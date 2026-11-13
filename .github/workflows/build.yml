@@ -7,30 +7,40 @@ on:
 jobs:
   build-win32:
     runs-on: windows-latest
-    env:
-      CARGO_HTTP_MULTIPLEXING: false
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
     - uses: actions/checkout@v5
       with:
         submodules: recursive
 
-    - name: Setup Rust i686
-      run: |
-        rustup target add i686-pc-windows-msvc
-
-    - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2
+    - uses: msys2/setup-msys2@v2
       with:
-        version: 1.3.296.0
-        cache: true
+        msystem: MINGW32
+        update: true
+        install: >-
+          mingw-w64-i686-toolchain
+          mingw-w64-i686-cmake
+          mingw-w64-i686-ninja
+          mingw-w64-i686-curl
+          mingw-w64-i686-freetype
+          mingw-w64-i686-glew
+          mingw-w64-i686-opusfile
+          mingw-w64-i686-python
+          mingw-w64-i686-SDL2
+          mingw-w64-i686-sqlite3
+          mingw-w64-i686-wavpack
+          mingw-w64-i686-rust
+          zip
 
     - name: Configure and Build Release Win32
       run: |
         mkdir build
         cd build
-        cmake -A Win32 -DEXCEPTION_HANDLING=ON -DVULKAN=ON ..
-        cmake --build . --config Release --target package_default
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DVULKAN=OFF -DWEBSOCKETS=OFF ..
+        cmake --build . --target package_default
 
     - name: Upload Win32 Client
       uses: actions/upload-artifact@v4
