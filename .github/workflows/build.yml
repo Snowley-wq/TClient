@@ -15,10 +15,9 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup MSVC x86
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x86
+    - name: Setup Rust i686
+      run: |
+        rustup target add i686-pc-windows-msvc
 
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
@@ -30,7 +29,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -G "Visual Studio 17 2022" -A Win32 -DEXCEPTION_HANDLING=ON -DVULKAN=ON ..
+        cmake -A Win32 -DEXCEPTION_HANDLING=ON -DVULKAN=ON ..
         cmake --build . --config Release --target package_default
 
     - name: Upload Win32 Client
